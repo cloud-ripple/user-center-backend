@@ -39,7 +39,7 @@ public class UserServiceTest {
         Assertions.assertTrue(result);
     }
 
-    // 测试用户注册
+    // 用户注册测试
     @Test
     void userRegister() {
         String userAccount = "ripple";
