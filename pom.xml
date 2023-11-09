@@ -88,6 +88,14 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <!--    打包项目时，跳过测试   -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

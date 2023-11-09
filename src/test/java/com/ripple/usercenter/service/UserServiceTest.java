@@ -1,9 +1,5 @@
 package com.ripple.usercenter.service;
 
-import java.util.Date;
-
-
-import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.ripple.usercenter.model.domain.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

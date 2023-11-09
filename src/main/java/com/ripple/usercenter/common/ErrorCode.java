@@ -1,7 +1,5 @@
 package com.ripple.usercenter.common;
 
-import lombok.Data;
-
 /**
  * @author 花海
  * @date 2023/11/9
