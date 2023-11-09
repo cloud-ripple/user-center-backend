@@ -25,6 +25,7 @@ public class BaseResponse<T> implements Serializable {
         this.code = code;
         this.data = data;
         this.massage = massage;
+        this.description = description;
     }
 
     // 成功

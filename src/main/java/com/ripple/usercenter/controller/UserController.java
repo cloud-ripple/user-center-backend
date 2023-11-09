@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ripple.usercenter.common.BaseResponse;
 import com.ripple.usercenter.common.ErrorCode;
 import com.ripple.usercenter.common.ResultUtils;
+import com.ripple.usercenter.exception.BusinessException;
 import com.ripple.usercenter.model.domain.User;
 import com.ripple.usercenter.model.domain.request.UserLoginRequest;
 import com.ripple.usercenter.model.domain.request.UserRegisterRequest;
@@ -38,7 +39,7 @@ public class UserController {
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
-            return ResultUtils.error(ErrorCode.NULL_ERROR);
+            return ResultUtils.error(ErrorCode.NULL_ERROR, "");
         }
         log.info("用户注册请求参数，{}", userRegisterRequest);
         // 前端传递过来的所有请求参数封装在 UserRegisterRequest 实体类中
@@ -48,17 +49,17 @@ public class UserController {
         String planetCode = userRegisterRequest.getPlanetCode();
         // 简单校验，如果这3个请求参数有一个为空
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword, planetCode)) {
-            return null;
+            return ResultUtils.error(ErrorCode.NULL_ERROR, "");
         }
         // 调用服务层注册方法
         long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
-        return new BaseResponse<Long>(0, result, "ok");
+        return ResultUtils.success(result);
     }
 
     @PostMapping("/login")
     public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
-            return null;
+            return ResultUtils.error(ErrorCode.NULL_ERROR, "数据为空");
         }
         log.info("用户登录请求参数：{}", userLoginRequest);
         // 前端传递过来的 账户、密码 参数封装在 UserLoginRequest 实体类中，而Http请求对象封装在 HttpServletRequest
@@ -66,10 +67,10 @@ public class UserController {
         String userPassword = userLoginRequest.getUserPassword();
         // 简单校验，如果这2个请求参数有一个为空
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            return null;
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         User user = userService.userLogin(userAccount, userPassword, request);
-        return new BaseResponse<User>(0, user, "ok");
+        return ResultUtils.success(user);
     }
 
     @PostMapping("/logout")
@@ -88,7 +89,7 @@ public class UserController {
         // 从 session 中拿到用户的登录状态信息
         User userObj = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (userObj == null) {
-            return null;
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户没有登录");
         }
         long userId = userObj.getId();
         // todo 校验用户是否合法
@@ -103,7 +104,7 @@ public class UserController {
         log.info("查询用户参数 username：{}", username);
         // 仅管理员可查询
         if (!isAdmin(request)) {
-            return new ArrayList<>(); //如果不是管理员返回空列表
+            throw new BusinessException(ErrorCode.NO_AUTH, "仅管理员可查询"); //如果不是管理员返回空列表
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         // isNotBlank 判断该字符串长度是否为0、为空
@@ -127,10 +128,10 @@ public class UserController {
         log.info("删除用户参数 id：{}", id);
         // 仅管理员可删除
         if (!isAdmin(request)) {
-            return false;
+            throw new BusinessException(ErrorCode.NO_AUTH, "仅管理员可删除");
         }
         if (id <= 0) {
-            return false;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "该删除的用户id不合法");
         }
         return userService.removeById(id);
     }
@@ -145,7 +146,7 @@ public class UserController {
         // 仅管理员可查询
         User userObj = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (userObj == null || userObj.getUserRole() != ADMIN_ROLE) {
-            return false;
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户未登录或非管理员");
         }
         return true;
     }
