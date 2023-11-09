@@ -45,35 +45,36 @@ public class UserServiceTest {
         String userAccount = "ripple";
         String userPassword = "";
         String checkPassword = "123456";
-        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        String planetCode = "1";
+        long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
         Assertions.assertEquals(-1, result);
 
         userAccount = "bo"; // 测试账户长度不小于 4 位数
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
         Assertions.assertEquals(-1, result);
 
         userAccount = "ripple"; // 测试密码位数 不小于8
         userPassword = "123456";
         checkPassword = "123456";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
         Assertions.assertEquals(-1, result);
 
         userAccount = "ripp le"; // 测试特殊空格字符
         userPassword = "12345678";
         checkPassword = "12345678";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
         Assertions.assertEquals(-1, result);
 
         userAccount = "ripple"; // 测试密码和校验密码是否一致
         userPassword = "12345678";
         checkPassword = "123456789";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
         Assertions.assertEquals(-1, result);
 
         userAccount = "yupi"; // 测试正常密码
         userPassword = "123456789";
         checkPassword = "123456789";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
         Assertions.assertEquals(-1, result);
 
     }

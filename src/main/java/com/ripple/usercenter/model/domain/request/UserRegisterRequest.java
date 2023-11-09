@@ -14,7 +14,9 @@ import java.io.Serializable;
 public class UserRegisterRequest implements Serializable {
 
     private static final long serialVersionUID = -7920460114493865421L;
-    private String userAccount;
-    private String userPassword;
-    private String checkPassword;
+    private String userAccount; //用户账号
+    private String userPassword; //用户密码
+    private String checkPassword; //确认密码
+    private String planetCode; //星球编号
+
 }

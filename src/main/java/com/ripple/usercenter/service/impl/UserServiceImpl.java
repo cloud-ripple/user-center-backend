@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.ripple.usercenter.constant.UserConstant.USER_LOGIN_STATE;
+
 /**
  * @author 花海
  * @description 针对表【user(用户)】的数据库操作Service实现
@@ -32,15 +34,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     private static final String SALT = "bobo"; //（加密配方）搅屎棍，让密码更加复杂 知道盐才能解密，防解密
 
-    /**
-     * 用户登录键
-     */
-    public static final String USER_LOGIN_STATE = "userLoginState";
 
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword) {
+    public long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode) {
         // 1. 校验 isAnyBlank方法用于校验字符串是否为 null 、空
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword,planetCode)) {
             // todo 修改为自定义异常
             return -1; //有一项不满足校验就返回-1
         }
@@ -48,6 +46,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return -1;
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
+            return -1;
+        }
+        if (planetCode.length() > 5) {
             return -1;
         }
         //账户不能重复，查询数据库中的用户
@@ -58,6 +59,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (count > 0) {
             return -1;
         }
+
+        //星球编号不能重复，二次查询数据库中的用户
+        queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("planetCode", planetCode);
+        count = userMapper.selectCount(queryWrapper);
+        // 如果该账户已经有人注册了
+        if (count > 0) {
+            return -1;
+        }
+
         //账户不能包含特殊字符
         // 只允许字母和数字 // String regEx ="[^a-zA-Z0-9]";
         // 清除掉所有特殊字符
@@ -79,6 +90,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
+        user.setPlanetCode(planetCode);
         boolean saveResult = this.save(user);
         if (!saveResult) {
             return -1;
@@ -126,6 +138,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         // 4. 把该用户信息脱敏
+        User safetyUser = getSafetyUser(user);
+
+        // 5. 记录用户的登录状态,将其存放到服务器上(session)，当前只是单个，后面可以做成分布式
+        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
+
+        return safetyUser;
+    }
+
+    /**
+     * 用户信息脱敏
+     *
+     * @param user 数据库中查询的用户
+     * @return 脱敏处理后的用户
+     */
+    @Override
+    public User getSafetyUser(User user) {
+        if (user == null) {
+            return null;
+        }
         User safetyUser = new User();
         safetyUser.setId(user.getId());
         safetyUser.setUsername(user.getUsername());
@@ -136,12 +167,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setEmail(user.getEmail());
         safetyUser.setUserStatus(user.getUserStatus());
         safetyUser.setCreateTime(user.getCreateTime()); // 更新时间、是否被删除不用返回了
-
-        // 5. 记录用户的登录状态,将其存放到服务器上(session)，当前只是单个，后面可以做成分布式
-        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
+        safetyUser.setUserRole(user.getUserRole());
 
         return safetyUser;
     }
+
+    /**
+     * 用户注销
+     * @param request 请求对象
+     */
+    @Override
+    public void UserLogout(HttpServletRequest request) {
+        // 移除 session 中的登录态
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+    }
+
+
 }
 
 

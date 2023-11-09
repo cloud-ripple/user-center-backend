@@ -6,12 +6,18 @@ spring:
     username: root
     password: twb
     url: jdbc:mysql://localhost:3306/user_center
+  # 设置session会话失效时间 一天
+  session:
+    timeout: 86400
 
 server:
   port: 8080
+  servlet:
+    context-path: /api
 
-# mapUnderscoreToCamelCase 是否开启自动驼峰命名规则（camel case）映射，
+  # mapUnderscoreToCamelCase 是否开启自动驼峰命名规则（camel case）映射，
   #即从经典数据库列名 A_COLUMN（下划线命名） 到经典 Java 属性名 aColumn（驼峰命名） 的类似映射。
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
