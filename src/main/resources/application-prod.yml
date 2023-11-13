@@ -1,15 +1,14 @@
 # 生产环境配置
 spring:
-  application:
-    name: user-center
   # 使用生产环境下的数据源
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: twb
-    url: jdbc:mysql://localhost:3306/user_center # 使用生产环境中的数据库地址
+    password: 123456
+    url: jdbc:mysql://192.158.200.101:3306/user_center # 使用生产环境中的数据库地址
   # 设置session会话失效时间 一天
   session:
     timeout: 86400
 
-
+server:
+  address: 0.0.0.0

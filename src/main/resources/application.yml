@@ -5,7 +5,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: twb
-    url: jdbc:mysql://localhost:3306/user_center
+    url: jdbc:mysql://localhost/user_center
   # 设置session会话失效时间 一天
   session:
     timeout: 86400
